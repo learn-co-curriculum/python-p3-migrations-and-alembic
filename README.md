@@ -131,6 +131,7 @@ Now we can finally update `env.py`:
 
 ```py
 # migrations/env.py
+# search file for target_metadata (line 21)
 from app.db import Base
 target_metadata = Base.metadata
 ```
@@ -154,63 +155,246 @@ directory structure matches the one below:
 
 ***
 
-```py
-# python code block
-print("statement")
-# => statement
-```
+## Generating our First Migration
 
-```js
-// javascript code block
-console.log("use these for comparisons between languages.")
-// => use these for comparisons between languages.
-```
+Let's start off with creating a base, empty migration. Make sure you are in
+the `CH12/` directory and run the following command:
 
 ```console
-echo "bash/zshell statement"
-# => bash/zshell statement
+% alembic revision -m "Empty Init"
+  Generating .../python-p3-migrations-and-alembic/CH12/migrations/versions/6b9cb35ba46e_empty_init.py ...  done
+```
+
+You should notice that a new file has popped up in the `migrations/versions/`
+directory. Here's what you should see inside:
+
+```py
+"""Empty Init
+
+Revision ID: 6b9cb35ba46e
+Revises: 
+Create Date: 2022-08-04 13:21:26.936909
+
+"""
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision = '6b9cb35ba46e'
+down_revision = None
+branch_labels = None
+depends_on = None
+
+
+def upgrade() -> None:
+    pass
+
+
+def downgrade() -> None:
+    pass
+```
+
+This file starts off with the message that we included with our `alembic`
+command. It is important to treat these messages as you would commit messages
+in Git so that other developers know when certain tables, columns, keys, and
+so on were added to the database.
+
+The `upgrade()` method includes the code that would be needed to perform
+changes to the database based on this migration. Similarly, the `downgrade()`
+method includes any code that would be needed to undo this migration and return
+to the previous state.
+
+Were there to be any changes in our migration, we would run the following
+command:
+
+```py
+% alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 6b9cb35ba46e, Empty Init
+***
+```
+
+This upgrades the database to the `head`, or newest revision.
+
+Now that we've laid down a base for our migrations, we can begin adding data
+to our SQLAlchemy app. When we make changes to data models, we can use Alembic
+to automatically generate migrations for us and upgrade the database
+accordingly.
+
+## Autogenerating a Migration
+
+Now let's add our data model to `app/db.py`. We'll keep working with the
+`Student` model from previous lessons.
+
+```py
+# app/db.py
+import os
+import sys
+
+sys.path.append(os.getcwd())
+
+
+from datetime import datetime
+
+from sqlalchemy import create_engine, desc
+from sqlalchemy import (CheckConstraint, UniqueConstraint,
+    Column, DateTime, Integer, String)
+
+from sqlalchemy.ext.declarative import declarative_base
+
+engine = create_engine('sqlite:///migrations_test.db')
+
+Base = declarative_base()
+
+class Student(Base):
+    __tablename__ = 'students'
+    __table_args__ = (
+        UniqueConstraint('student_email',
+            name='unique_email'),
+        CheckConstraint('student_grade BETWEEN 1 AND 12',
+            name='grade_between_1_and_12'))
+
+    student_id = Column(Integer(), primary_key=True)
+    student_name = Column(String(), index=True)
+    student_email = Column(String(55))
+    student_grade = Column(Integer())
+    student_birthday = Column(DateTime())
+    student_enrolled_date = Column(DateTime(), default=datetime.now())
+
+    def __repr__(self):
+        return f"Student {self.student_id}: " \
+            + f"{self.student_name}, " \
+            + f"Grade {self.student_grade}"
 ```
 
 <details>
   <summary>
-    <em>Check for understanding text goes here! <code>Code statements go here.</code></em>
+    <em>Note that we are no longer including the shebang. Why is that?</em>
   </summary>
 
-  <h3>Answer.</h3>
-  <p>Elaboration on answer.</p>
+  <h3>This file will not be executed as a script.</h3>
+  <p>The shebang tells the command line where to find the interpreter for the
+     code in a file. It is only necessary for code that you want to execute
+     from the command line without the <code>python</code> keyword.</p>
 </details>
 <br/>
+
+With our `Student` model added in, we can now create a migration to add the
+`students` table to our database. This is a simple migration, so we can take
+advantage of Alembic's ability to generate the code for us automatically:
+
+```console
+% alembic revision --autogenerate -m "Added Student model"
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.autogenerate.compare] Detected added table 'students'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_students_student_name' on '['student_name']'
+  Generating /Users/benbotsford/Documents/new-curriculum/intro-to-sqlalchemy/python-p3-migrations-and-alembic/CH12/migrations/versions/361dae855898_added_student_model.py ...  done
+```
+
+During autogeneration, Alembic inspects the metadata of `Base` in `db.py`,
+comparing it to the current state of the database. In the command above,
+Alembic detected that we added a model for a `students` table. It also detected
+that we added an index on `student_name` to speed up searches by name.
+
+Let's take a look at the new migration file:
+
+```py
+"""Added Student model
+
+Revision ID: 361dae855898
+Revises: 6b9cb35ba46e
+Create Date: 2022-08-04 14:21:32.441071
+
+"""
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision = '361dae855898'
+down_revision = '6b9cb35ba46e'
+branch_labels = None
+depends_on = None
+
+
+def upgrade() -> None:
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('students',
+    sa.Column('student_id', sa.Integer(), nullable=False),
+    sa.Column('student_name', sa.String(), nullable=True),
+    sa.Column('student_email', sa.String(length=55), nullable=True),
+    sa.Column('student_grade', sa.Integer(), nullable=True),
+    sa.Column('student_birthday', sa.DateTime(), nullable=True),
+    sa.Column('student_enrolled_date', sa.DateTime(), nullable=True),
+    sa.CheckConstraint('student_grade BETWEEN 1 AND 12', name='grade_between_1_and_12'),
+    sa.PrimaryKeyConstraint('student_id'),
+    sa.UniqueConstraint('student_email', name='unique_email')
+    )
+    op.create_index(op.f('ix_students_student_name'), 'students', ['student_name'], unique=False)
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_students_student_name'), table_name='students')
+    op.drop_table('students')
+    # ### end Alembic commands ###
+```
+
+There are a few important things to note here. First, a `down_revision` has been
+added. This points to the ID for the previous migration file. We can also see
+that the `upgrade()` and `downgrade()` methods have been filled out. The syntax
+is very similar to that of a SQLAlchemy ORM model- columns, data types,
+constraints and so on are defined by classes imported via the `sqlalchemy`
+module. Alembic then executes these instructions using its own `op` class.
+
+Now we can run the autogenerated migration and create the `students` table:
+
+```console
+% alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 6b9cb35ba46e -> 361dae855898, Added Student model
+```
+
+Open up `migrations_test.db` and you should see two tables: `alembic_version`,
+which stored the migration ID for the current state of the database, and
+`students`, which contains all of the columns, keys, and constraints that we
+included in our model!
+
+![Table `students` with columns: `student_id`, `student_name`, `student_email`,
+`student_grade`, `student_birthday`, and `student_enrolled_date`.](https://curriculum-content.s3.amazonaws.com/python/studentsdb.png
+"students table")
 
 ***
 
 ## Instructions
 
-This is a **test-driven lab**. Run `pipenv install` to create your virtual
-environment and `pipenv shell` to enter the virtual environment. Then run
-`pytest -x` to run your tests. Use these instructions and `pytest`'s error
-messages to complete your work in the `lib/` folder.
+If you have not already, run `pipenv install` to create your virtual
+environment and `pipenv shell` to enter the virtual environment.
 
-Instructions begin here:
+- Add a column to the `Student` model.
+- Autogenerate a migration using Alembic.
+- Upgrade your database schema with `alembic upgrade head`.
 
-- Make sure to specify any class, method, variable, module, package names
-  that `pytest` will check for.
-- Any other instructions go here.
-
-Once all of your tests are passing, commit and push your work using `git` to
-submit.
-
-***
+Once your database schema has been upgraded, commit and push your work using
+`git` to submit.
 
 ## Conclusion
 
-Conclusion summary paragraph. Include common misconceptions and what students
-will be able to do moving forward.
+Managing migrations is an important skill for a full-stack developer to keep
+in their toolbox. Alembic is a powerful tool for carrying out migrations and
+can handle most tasks automatically. That being said, Alembic can't do
+_everything_ on its own. In the next lesson, we will explore how to manually
+configure migrations and downgrade to revert to an earlier state.
 
 ***
 
 ## Resources
 
-- [Resource 1](https://www.python.org/doc/essays/blurb/)
-- [Reused Resource][reused resource]
-
-[reused resource]: https://docs.python.org/3/
+- [SQLAlchemy ORM Documentation](https://docs.sqlalchemy.org/en/14/orm/)
+- [SQLAlchemy ORM Column Elements and Expressions](https://docs.sqlalchemy.org/en/14/core/sqlelement.html)
+- [Tutorial - Alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html)
