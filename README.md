@@ -54,12 +54,12 @@ SQLAlchemy, it can be used with a wide range of databases and web frameworks.
 
 ## Creating a Migration Environment
 
-To create a migration environment, create a folder labeled CH12 and `cd` into
-that directory. Next, run `alembic init migrations` command to create a migration
-environment in the `migrations/` directory. This process creates a migration
-environment as well as an `alembic.ini` file with configuration options for our
-environment. If you run `tree` in our directory now, you should see this
-structure:
+To create a migration environment, create a directory `CH12` and `cd` into
+that directory. Next, run `alembic init migrations` command to create a
+migration environment in the `migrations/` directory. This process creates our
+migration environment as well as an `alembic.ini` file with configuration
+options for the environment. If you run `tree` in our directory now, you should
+see this structure:
 
 ```console
 .
@@ -83,7 +83,74 @@ our SQLAlchemy app.
 
 ## Configuring a Migration Environment
 
+`alembic.ini` and `env.py` contain important settings that need to be changed
+to work with our database and SQLAlchemy app specifically. `alembic.ini`
+contains a `sqlalchemy.url` setting on line 58 that points to the project
+database. Since we're starting to make changes to existing databases, we're
+going to use a `.db` file instead of working in memory:
+
+```ini
+# alembic.ini
+sqlalchemy.url = sqlite:///migrations_test.db
+```
+
+Next, navigate into `app/db.py` to start designing our database with SQLAlchemy.
+
+```py
+# app/db.py
+
+#!/usr/bin/env python3
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+engine = create_engine('sqlite:///migrations_test.db')
+
+Base = declarative_base()
+```
+
+Next, we need to configure `env.py` to point to the metadata attribute of our
+new `declarative_base` object. Alembic will use this metadata to compare the
+structure of the database schema to the models as they are defined in SQLAlchemy.
+First things first, we need to update the path from `app/db.py` so that it is
+visible to `env.py`:
+
+```py
+# app/db.py
+
+# interact with operating system
+import os
+# access system parameters
+import sys
+
+# add current working directory (cwd) to path
+sys.path.append(os.getcwd())
+```
+
+Now we can finally update `env.py`:
+
+```py
+# migrations/env.py
+from app.db import Base
+target_metadata = Base.metadata
+```
+
+We're all set and ready to make our first migrations. Before we move onto the
+next section, run `tree` from the `CH12/` directory and make sure your
+directory structure matches the one below:
+
+```console
 .
+├── alembic.ini
+├── app
+│   ├── __init__.py
+│   └── db.py
+└── migrations
+    ├── README
+    ├── env.py
+    ├── script.py.mako
+    └── versions
+```
 
 ***
 
