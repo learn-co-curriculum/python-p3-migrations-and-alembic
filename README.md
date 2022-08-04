@@ -383,6 +383,8 @@ environment and `pipenv shell` to enter the virtual environment.
 Once your database schema has been upgraded, commit and push your work using
 `git` to submit.
 
+***
+
 ## Conclusion
 
 Managing migrations is an important skill for a full-stack developer to keep
