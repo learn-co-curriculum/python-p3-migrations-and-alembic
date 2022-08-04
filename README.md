@@ -54,7 +54,7 @@ SQLAlchemy, it can be used with a wide range of databases and web frameworks.
 
 ## Creating a Migration Environment
 
-To create a migration environment, create a directory `CH12` and `cd` into
+To create a migration environment, create a directory `P3` and `cd` into
 that directory. Next, run `alembic init migrations` command to create a
 migration environment in the `migrations/` directory. This process creates our
 migration environment as well as an `alembic.ini` file with configuration
@@ -137,7 +137,7 @@ target_metadata = Base.metadata
 ```
 
 We're all set and ready to make our first migrations. Before we move onto the
-next section, run `tree` from the `CH12/` directory and make sure your
+next section, run `tree` from the `P3/` directory and make sure your
 directory structure matches the one below:
 
 ```console
@@ -158,11 +158,11 @@ directory structure matches the one below:
 ## Generating our First Migration
 
 Let's start off with creating a base, empty migration. Make sure you are in
-the `CH12/` directory and run the following command:
+the `P3/` directory and run the following command:
 
 ```console
 % alembic revision -m "Empty Init"
-  Generating .../python-p3-migrations-and-alembic/CH12/migrations/versions/6b9cb35ba46e_empty_init.py ...  done
+  Generating .../python-p3-migrations-and-alembic/P3/migrations/versions/6b9cb35ba46e_empty_init.py ...  done
 ```
 
 You should notice that a new file has popped up in the `migrations/versions/`
@@ -291,7 +291,7 @@ INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.autogenerate.compare] Detected added table 'students'
 INFO  [alembic.autogenerate.compare] Detected added index 'ix_students_student_name' on '['student_name']'
-  Generating /Users/benbotsford/Documents/new-curriculum/intro-to-sqlalchemy/python-p3-migrations-and-alembic/CH12/migrations/versions/361dae855898_added_student_model.py ...  done
+  Generating /Users/benbotsford/Documents/new-curriculum/intro-to-sqlalchemy/python-p3-migrations-and-alembic/P3/migrations/versions/361dae855898_added_student_model.py ...  done
 ```
 
 During autogeneration, Alembic inspects the metadata of `Base` in `db.py`,
