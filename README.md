@@ -10,6 +10,8 @@
 
 ## Key Vocab
 
+- **Schema**: the blueprint of a database. Describes how data relates to other
+  data in tables, columns, and relationships between them.
 - **Persist**: save a schema in a database.
 - **Engine**: a Python object that translates SQL to Python and vice-versa.
 - **Session**: a Python object that uses an engine to allow us to
