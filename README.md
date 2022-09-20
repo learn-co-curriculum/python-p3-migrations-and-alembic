@@ -29,7 +29,13 @@ You may have noticed in the curriculum so far that we haven't made many changes
 to the database schemas after we started adding data. If you've explored a bit
 more on your own, you probably ran into an error telling you that your new
 column doesn't exist, or even worse, that an old column cannot be accessed
-anymore. This is a familiar problem to most professional programmers, managing
+anymore.
+
+```py
+# => TypeError: 'name' is an invalid keyword argument for Dog
+```
+
+This is a familiar problem to most professional programmers, managing
 **migrations**.
 
 Alembic is a library for handling schema changes that uses SQLAlchemy to
