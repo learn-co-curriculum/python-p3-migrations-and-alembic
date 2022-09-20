@@ -56,7 +56,7 @@ SQLAlchemy, it can be used with a wide range of databases and web frameworks.
 
 ## Creating a Migration Environment
 
-To create a migration environment, create a directory `P3` and `cd` into
+To create a migration environment, create a directory `app` and `cd` into
 that directory. Next, run `alembic init migrations` command to create a
 migration environment in the `migrations/` directory. This process creates our
 migration environment as well as an `alembic.ini` file with configuration
@@ -89,70 +89,55 @@ our SQLAlchemy app.
 to work with our database and SQLAlchemy app specifically. `alembic.ini`
 contains a `sqlalchemy.url` setting on line 58 that points to the project
 database. Since we're starting to make changes to existing databases, we're
-going to use a `.db` file instead of working in memory:
+going to create a `db/` directory inside of the `app/` directory and use a `.db`
+file instead of working in memory:
 
 ```ini
 # alembic.ini
-sqlalchemy.url = sqlite:///migrations_test.db
+sqlalchemy.url = sqlite:///db/migrations_test.db
 ```
 
-Next, navigate into `app/db.py` to start designing our database with SQLAlchemy.
+Next, navigate into `models.py` to start designing our database with SQLAlchemy.
 
 ```py
-# app/db.py
+# models.py
 
 #!/usr/bin/env python3
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///migrations_test.db')
+engine = create_engine('sqlite:///db/migrations_test.db')
 
 Base = declarative_base()
 ```
 
 Next, we need to configure `env.py` to point to the metadata attribute of our
 new `declarative_base` object. Alembic will use this metadata to compare the
-structure of the database schema to the models as they are defined in SQLAlchemy.
-First things first, we need to update the path from `app/db.py` so that it is
-visible to `env.py`:
-
-```py
-# app/db.py
-
-# interact with operating system
-import os
-# access system parameters
-import sys
-
-# add current working directory (cwd) to path
-sys.path.append(os.getcwd())
-```
-
-Now we can finally update `env.py`:
+structure of the database schema to the models as they are defined in
+SQLAlchemy. Now, let's update `migrations/env.py`:
 
 ```py
 # migrations/env.py
 # search file for target_metadata (line 21)
-from app.db import Base
+from models import Base
 target_metadata = Base.metadata
 ```
 
 We're all set and ready to make our first migrations. Before we move onto the
-next section, run `tree` from the `P3/` directory and make sure your
+next section, run `tree` from the `app/` directory and make sure your
 directory structure matches the one below:
 
 ```console
 .
 ├── alembic.ini
-├── app
-│   ├── __init__.py
-│   └── db.py
+└── db
 └── migrations
     ├── README
     ├── env.py
     ├── script.py.mako
     └── versions
+└── models.py
 ```
 
 ***
@@ -160,11 +145,11 @@ directory structure matches the one below:
 ## Generating our First Migration
 
 Let's start off with creating a base, empty migration. Make sure you are in
-the `P3/` directory and run the following command:
+the `app/` directory and run the following command:
 
 ```console
 % alembic revision -m "Empty Init"
-  Generating .../python-p3-migrations-and-alembic/P3/migrations/versions/6b9cb35ba46e_empty_init.py ...  done
+  Generating .../python-p3-migrations-and-alembic/app/migrations/versions/6b9cb35ba46e_empty_init.py ...  done
 ```
 
 You should notice that a new file has popped up in the `migrations/versions/`
@@ -195,6 +180,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     pass
+
 ```
 
 This file starts off with the message that we included with our `alembic`
@@ -210,8 +196,8 @@ to the previous state.
 Were there to be any changes in our migration, we would run the following
 command:
 
-```py
-% alembic upgrade head
+```console
+$ alembic upgrade head
 INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.runtime.migration] Running upgrade  -> 6b9cb35ba46e, Empty Init
@@ -225,19 +211,15 @@ to our SQLAlchemy app. When we make changes to data models, we can use Alembic
 to automatically generate migrations for us and upgrade the database
 accordingly.
 
+***
+
 ## Autogenerating a Migration
 
-Now let's add our data model to `app/db.py`. We'll keep working with the
+Now let's add our data model to `models.py`. We'll keep working with the
 `Student` model from previous lessons.
 
 ```py
-# app/db.py
-import os
-import sys
-
-sys.path.append(os.getcwd())
-
-
+# models.py
 from datetime import datetime
 
 from sqlalchemy import create_engine, desc
@@ -246,7 +228,7 @@ from sqlalchemy import (CheckConstraint, UniqueConstraint,
 
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('sqlite:///migrations_test.db')
+engine = create_engine('sqlite:///db/migrations_test.db')
 
 Base = declarative_base()
 
@@ -256,7 +238,8 @@ class Student(Base):
         UniqueConstraint('student_email',
             name='unique_email'),
         CheckConstraint('student_grade BETWEEN 1 AND 12',
-            name='grade_between_1_and_12'))
+            name='grade_between_1_and_12')
+    )
 
     student_id = Column(Integer(), primary_key=True)
     student_name = Column(String(), index=True)
@@ -288,15 +271,15 @@ With our `Student` model added in, we can now create a migration to add the
 advantage of Alembic's ability to generate the code for us automatically:
 
 ```console
-% alembic revision --autogenerate -m "Added Student model"
+$ alembic revision --autogenerate -m "Added Student model"
 INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.autogenerate.compare] Detected added table 'students'
 INFO  [alembic.autogenerate.compare] Detected added index 'ix_students_student_name' on '['student_name']'
-  Generating /Users/benbotsford/Documents/new-curriculum/intro-to-sqlalchemy/python-p3-migrations-and-alembic/P3/migrations/versions/361dae855898_added_student_model.py ...  done
+  Generating /python-p3-migrations-and-alembic/app/migrations/versions/361dae855898_added_student_model.py ...  done
 ```
 
-During autogeneration, Alembic inspects the metadata of `Base` in `db.py`,
+During autogeneration, Alembic inspects the metadata of `Base` in `models.py`,
 comparing it to the current state of the database. In the command above,
 Alembic detected that we added a model for a `students` table. It also detected
 that we added an index on `student_name` to speed up searches by name.
@@ -356,34 +339,20 @@ module. Alembic then executes these instructions using its own `op` class.
 Now we can run the autogenerated migration and create the `students` table:
 
 ```console
-% alembic upgrade head
+$ alembic upgrade head
 INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.runtime.migration] Running upgrade 6b9cb35ba46e -> 361dae855898, Added Student model
 ```
 
-Open up `migrations_test.db` and you should see two tables: `alembic_version`,
-which stored the migration ID for the current state of the database, and
-`students`, which contains all of the columns, keys, and constraints that we
-included in our model!
+Open up `db/migrations_test.db` and you should see two tables:
+`alembic_version`, which stores the migration ID for the current state of the
+database, and `students`, which contains all of the columns, keys, and
+constraints that we included in our model!
 
 ![Table `students` with columns: `student_id`, `student_name`, `student_email`,
 `student_grade`, `student_birthday`, and `student_enrolled_date`.](https://curriculum-content.s3.amazonaws.com/python/studentsdb.png
 "students table")
-
-***
-
-## Instructions
-
-If you have not already, run `pipenv install` to create your virtual
-environment and `pipenv shell` to enter the virtual environment.
-
-- Add a column to the `Student` model.
-- Autogenerate a migration using Alembic.
-- Upgrade your database schema with `alembic upgrade head`.
-
-Once your database schema has been upgraded, commit and push your work using
-`git` to submit.
 
 ***
 
@@ -394,6 +363,65 @@ in their toolbox. Alembic is a powerful tool for carrying out migrations and
 can handle most tasks automatically. That being said, Alembic can't do
 _everything_ on its own. In the next lesson, we will explore how to manually
 configure migrations and downgrade to revert to an earlier state.
+
+***
+
+## Solution code
+
+```py
+# models.py
+
+from datetime import datetime
+
+from sqlalchemy import create_engine, desc
+from sqlalchemy import (CheckConstraint, UniqueConstraint,
+    Column, DateTime, Integer, String)
+
+from sqlalchemy.ext.declarative import declarative_base
+
+engine = create_engine('sqlite:///db/migrations_test.db')
+
+Base = declarative_base()
+
+class Student(Base):
+    __tablename__ = 'students'
+    __table_args__ = (
+        UniqueConstraint('student_email',
+            name='unique_email'),
+        CheckConstraint('student_grade BETWEEN 1 AND 12',
+            name='grade_between_1_and_12')
+    )
+
+    student_id = Column(Integer(), primary_key=True)
+    student_name = Column(String(), index=True)
+    student_email = Column(String(55))
+    student_grade = Column(Integer())
+    student_birthday = Column(DateTime())
+    student_enrolled_date = Column(DateTime(), default=datetime.now())
+
+    def __repr__(self):
+        return f"Student {self.student_id}: " \
+            + f"{self.student_name}, " \
+            + f"Grade {self.student_grade}"
+
+```
+
+```ini
+# alembic.ini
+# line 58
+sqlalchemy.url = sqlite:///db/migrations_test.db
+
+```
+
+```py
+# env.py
+
+# migrations/env.py
+# lines 21-22
+from models import Base
+target_metadata = Base.metadata
+
+```
 
 ***
 
