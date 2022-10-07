@@ -95,12 +95,11 @@ our SQLAlchemy app.
 to work with our database and SQLAlchemy app specifically. `alembic.ini`
 contains a `sqlalchemy.url` setting on line 58 that points to the project
 database. Since we're starting to make changes to existing databases, we're
-going to create a `db/` directory inside of the `app/` directory and use a `.db`
-file instead of working in memory:
+going to use a `.db` file instead of working in memory:
 
 ```ini
 # alembic.ini
-sqlalchemy.url = sqlite:///db/migrations_test.db
+sqlalchemy.url = sqlite:///migrations_test.db
 ```
 
 Next, navigate into `models.py` to start designing our database with SQLAlchemy.
@@ -112,7 +111,7 @@ Next, navigate into `models.py` to start designing our database with SQLAlchemy.
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('sqlite:///db/migrations_test.db')
+engine = create_engine('sqlite:///migrations_test.db')
 
 Base = declarative_base()
 ```
@@ -136,7 +135,6 @@ directory structure matches the one below:
 ```console
 .
 ├── alembic.ini
-└── db
 └── migrations
     ├── README
     ├── env.py
@@ -232,7 +230,7 @@ from sqlalchemy import (CheckConstraint, UniqueConstraint,
 
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('sqlite:///db/migrations_test.db')
+engine = create_engine('sqlite:///migrations_test.db')
 
 Base = declarative_base()
 
@@ -349,7 +347,7 @@ INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.runtime.migration] Running upgrade 6b9cb35ba46e -> 361dae855898, Added Student model
 ```
 
-Open up `db/migrations_test.db` and you should see two tables:
+Open up `migrations_test.db` and you should see two tables:
 `alembic_version`, which stores the migration ID for the current state of the
 database, and `students`, which contains all of the columns, keys, and
 constraints that we included in our model!
@@ -383,7 +381,7 @@ from sqlalchemy import (CheckConstraint, UniqueConstraint,
 
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('sqlite:///db/migrations_test.db')
+engine = create_engine('sqlite:///migrations_test.db')
 
 Base = declarative_base()
 
@@ -413,7 +411,7 @@ class Student(Base):
 ```ini
 # alembic.ini
 # line 58
-sqlalchemy.url = sqlite:///db/migrations_test.db
+sqlalchemy.url = sqlite:///migrations_test.db
 
 ```
 
