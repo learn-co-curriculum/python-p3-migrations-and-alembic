@@ -241,8 +241,7 @@ Now let's add our data model to `models.py`. We'll keep working with the
 from datetime import datetime
 
 from sqlalchemy import create_engine, desc
-from sqlalchemy import (CheckConstraint, UniqueConstraint,
-    Column, DateTime, Integer, String)
+from sqlalchemy import Column, DateTime, Integer, String
 
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -252,12 +251,6 @@ Base = declarative_base()
 
 class Student(Base):
     __tablename__ = 'students'
-    __table_args__ = (
-        UniqueConstraint('email',
-            name='unique_email'),
-        CheckConstraint('grade BETWEEN 1 AND 12',
-            name='grade_between_1_and_12')
-    )
 
     id = Column(Integer(), primary_key=True)
     name = Column(String(), index=True)
@@ -332,9 +325,7 @@ def upgrade() -> None:
     sa.Column('grade', sa.Integer(), nullable=True),
     sa.Column('birthday', sa.DateTime(), nullable=True),
     sa.Column('enrolled_date', sa.DateTime(), nullable=True),
-    sa.CheckConstraint('grade BETWEEN 1 AND 12', name='grade_between_1_and_12'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email', name='unique_email')
     )
     op.create_index(op.f('ix_students_name'), 'students', ['name'], unique=False)
     # ### end Alembic commands ###
@@ -395,8 +386,7 @@ configure migrations and downgrade to revert to an earlier state.
 from datetime import datetime
 
 from sqlalchemy import create_engine, desc
-from sqlalchemy import (CheckConstraint, UniqueConstraint,
-    Column, DateTime, Integer, String)
+from sqlalchemy import Column, DateTime, Integer, String
 
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -406,12 +396,6 @@ Base = declarative_base()
 
 class Student(Base):
     __tablename__ = 'students'
-    __table_args__ = (
-        UniqueConstraint('email',
-            name='unique_email'),
-        CheckConstraint('grade BETWEEN 1 AND 12',
-            name='grade_between_1_and_12')
-    )
 
     id = Column(Integer(), primary_key=True)
     name = Column(String(), index=True)
