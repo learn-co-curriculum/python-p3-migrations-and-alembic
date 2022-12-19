@@ -38,6 +38,11 @@ anymore.
 This is a familiar problem to most professional programmers, managing
 **migrations**.
 
+A migration is a set of commands that tells a database how to move a database
+from an old schema to a new one, and also how to move a database entirely from
+one server to the next. We will only be focusing on the former, schema
+migrations.
+
 Alembic is a library for handling schema changes that uses SQLAlchemy to
 perform the migrations in a standardized way. Since SQLAlchemy only creates
 missing tables when we use the `Base.metadata.create_all()` method, it doesn’t
@@ -206,7 +211,9 @@ INFO  [alembic.runtime.migration] Running upgrade  -> 6b9cb35ba46e, Empty Init
 ***
 ```
 
-This upgrades the database to the `head`, or newest revision.
+This upgrades the database to the `head`, or newest revision. If there are older
+revisions in your `versions/` directory as well, those will be run in order
+using the `down_revision`s as a guide.
 
 Now that we've laid down a base for our migrations, we can begin adding data
 to our SQLAlchemy app. When we make changes to data models, we can use Alembic
