@@ -63,6 +63,11 @@ SQLAlchemy, it can be used with a wide range of databases and web frameworks.
 </details>
 <br/>
 
+This lesson will make use of the `tree` command line tool. If you did not
+install `tree` in your environment setup in Phase 0, MacOS users can
+install this with the command `brew install tree`. WSL and Linux users can run
+`sudo apt-get install tree` to download it as well.
+
 ***
 
 ## Creating a Migration Environment
