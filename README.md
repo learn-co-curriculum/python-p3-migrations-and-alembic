@@ -68,6 +68,9 @@ install `tree` in your environment setup in Phase 0, MacOS users can
 install this with the command `brew install tree`. WSL and Linux users can run
 `sudo apt-get install tree` to download it as well.
 
+Fork this lesson and code along to create your first automated migration
+environment with Alembic.
+
 ***
 
 ## Creating a Migration Environment
