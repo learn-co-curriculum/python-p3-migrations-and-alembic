@@ -107,7 +107,8 @@ going to use a `.db` file instead of working in memory:
 sqlalchemy.url = sqlite:///migrations_test.db
 ```
 
-Next, navigate into `models.py` to start designing our database with SQLAlchemy.
+Next, create and navigate into `models.py` to start designing our database with
+SQLAlchemy:
 
 ```py
 # models.py
