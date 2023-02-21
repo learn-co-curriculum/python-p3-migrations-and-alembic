@@ -357,10 +357,11 @@ INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.runtime.migration] Running upgrade 6b9cb35ba46e -> 361dae855898, Added Student model
 ```
 
-Open up `migrations_test.db` and you should see two tables:
-`alembic_version`, which stores the migration ID for the current state of the
-database, and `students`, which contains all of the columns, keys, and
-constraints that we included in our model!
+Open up `migrations_test.db` with VSCode's SQLite Viewer extension (you should
+have this installed from the "SQL Fundamentals" module) and you
+should see two tables: `alembic_version`, which stores the migration ID for the
+current state of the database, and `students`, which contains all of the
+columns, keys, and constraints that we included in our model!
 
 ![Table `students` with columns: `id`, `name`, `email`,
 `grade`, `birthday`, and `enrolled_date`.](https://curriculum-content.s3.amazonaws.com/python/studentsdb.png
