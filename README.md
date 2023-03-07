@@ -75,7 +75,8 @@ environment with Alembic.
 
 ## Creating a Migration Environment
 
-To create a migration environment, create a directory `lib/` and `cd` into
+Run `pipenv install; pipenv shell` to enter your virtual environment. To create
+a migration environment, create a directory `lib/` and `cd` into
 that directory. Next, run `alembic init migrations` command to create a
 migration environment in the `migrations/` directory. This process creates our
 migration environment as well as an `alembic.ini` file with configuration
